@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
+            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
             "Weiss",
             "#FFFFFF"}, -1);
             this.button_LoadImage = new System.Windows.Forms.Button();
@@ -66,10 +66,15 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.neueFarbeHinzufügenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBox_DisplayRatioCorrection = new System.Windows.Forms.CheckBox();
+            this.button_Palette_generatefromImage = new System.Windows.Forms.Button();
+            this.label_Palette_colorCount = new System.Windows.Forms.Label();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.label_Palette_desiredCount = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Display)).BeginInit();
             this.groupBox_Size.SuspendLayout();
             this.groupBox_Color.SuspendLayout();
             this.contextMenu_Palette.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // button_LoadImage
@@ -87,7 +92,7 @@
             this.pictureBox_Display.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox_Display.Location = new System.Drawing.Point(223, 8);
             this.pictureBox_Display.Name = "pictureBox_Display";
-            this.pictureBox_Display.Size = new System.Drawing.Size(892, 742);
+            this.pictureBox_Display.Size = new System.Drawing.Size(1349, 867);
             this.pictureBox_Display.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox_Display.TabIndex = 1;
             this.pictureBox_Display.TabStop = false;
@@ -178,7 +183,7 @@
             // button_Apply
             // 
             this.button_Apply.Enabled = false;
-            this.button_Apply.Location = new System.Drawing.Point(12, 635);
+            this.button_Apply.Location = new System.Drawing.Point(12, 760);
             this.button_Apply.Name = "button_Apply";
             this.button_Apply.Size = new System.Drawing.Size(203, 41);
             this.button_Apply.TabIndex = 1;
@@ -188,7 +193,7 @@
             // button_Preview
             // 
             this.button_Preview.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button_Preview.Location = new System.Drawing.Point(12, 588);
+            this.button_Preview.Location = new System.Drawing.Point(12, 713);
             this.button_Preview.Name = "button_Preview";
             this.button_Preview.Size = new System.Drawing.Size(203, 41);
             this.button_Preview.TabIndex = 0;
@@ -197,12 +202,16 @@
             // 
             // groupBox_Color
             // 
+            this.groupBox_Color.Controls.Add(this.label_Palette_desiredCount);
+            this.groupBox_Color.Controls.Add(this.label_Palette_colorCount);
+            this.groupBox_Color.Controls.Add(this.numericUpDown1);
             this.groupBox_Color.Controls.Add(this.listView_Palette);
+            this.groupBox_Color.Controls.Add(this.button_Palette_generatefromImage);
             this.groupBox_Color.Controls.Add(this.button_Color_savePalette);
             this.groupBox_Color.Controls.Add(this.button_Color_loadPalette);
             this.groupBox_Color.Location = new System.Drawing.Point(12, 237);
             this.groupBox_Color.Name = "groupBox_Color";
-            this.groupBox_Color.Size = new System.Drawing.Size(203, 345);
+            this.groupBox_Color.Size = new System.Drawing.Size(203, 470);
             this.groupBox_Color.TabIndex = 4;
             this.groupBox_Color.TabStop = false;
             this.groupBox_Color.Text = "Farben auf Palette reduzieren";
@@ -212,14 +221,14 @@
             this.listView_Palette.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
-            listViewItem2.StateImageIndex = 0;
+            listViewItem1.StateImageIndex = 0;
             this.listView_Palette.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem2});
+            listViewItem1});
             this.listView_Palette.LabelEdit = true;
             this.listView_Palette.LargeImageList = this.imageList_Palette;
-            this.listView_Palette.Location = new System.Drawing.Point(6, 65);
+            this.listView_Palette.Location = new System.Drawing.Point(6, 154);
             this.listView_Palette.Name = "listView_Palette";
-            this.listView_Palette.Size = new System.Drawing.Size(185, 239);
+            this.listView_Palette.Size = new System.Drawing.Size(185, 277);
             this.listView_Palette.TabIndex = 0;
             this.listView_Palette.UseCompatibleStateImageBehavior = false;
             this.listView_Palette.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDown);
@@ -240,21 +249,21 @@
             // 
             // button_Color_savePalette
             // 
-            this.button_Color_savePalette.Location = new System.Drawing.Point(6, 310);
+            this.button_Color_savePalette.Location = new System.Drawing.Point(6, 437);
             this.button_Color_savePalette.Name = "button_Color_savePalette";
             this.button_Color_savePalette.Size = new System.Drawing.Size(185, 27);
             this.button_Color_savePalette.TabIndex = 0;
-            this.button_Color_savePalette.Text = "Palette speichern";
+            this.button_Color_savePalette.Text = "Palette als Datei speichern";
             this.button_Color_savePalette.UseVisualStyleBackColor = true;
             this.button_Color_savePalette.Click += new System.EventHandler(this.button_Color_savePalette_Click);
             // 
             // button_Color_loadPalette
             // 
-            this.button_Color_loadPalette.Location = new System.Drawing.Point(6, 32);
+            this.button_Color_loadPalette.Location = new System.Drawing.Point(6, 28);
             this.button_Color_loadPalette.Name = "button_Color_loadPalette";
-            this.button_Color_loadPalette.Size = new System.Drawing.Size(185, 27);
+            this.button_Color_loadPalette.Size = new System.Drawing.Size(185, 32);
             this.button_Color_loadPalette.TabIndex = 0;
-            this.button_Color_loadPalette.Text = "Palette laden";
+            this.button_Color_loadPalette.Text = "Palette aus Datei laden";
             this.button_Color_loadPalette.UseVisualStyleBackColor = true;
             this.button_Color_loadPalette.Click += new System.EventHandler(this.button_Color_loadPalette_Click);
             // 
@@ -285,7 +294,7 @@
             // button_Revert
             // 
             this.button_Revert.Enabled = false;
-            this.button_Revert.Location = new System.Drawing.Point(11, 682);
+            this.button_Revert.Location = new System.Drawing.Point(11, 807);
             this.button_Revert.Name = "button_Revert";
             this.button_Revert.Size = new System.Drawing.Size(203, 41);
             this.button_Revert.TabIndex = 1;
@@ -353,7 +362,7 @@
             // 
             this.checkBox_DisplayRatioCorrection.AutoSize = true;
             this.checkBox_DisplayRatioCorrection.Enabled = false;
-            this.checkBox_DisplayRatioCorrection.Location = new System.Drawing.Point(12, 733);
+            this.checkBox_DisplayRatioCorrection.Location = new System.Drawing.Point(12, 858);
             this.checkBox_DisplayRatioCorrection.Name = "checkBox_DisplayRatioCorrection";
             this.checkBox_DisplayRatioCorrection.Size = new System.Drawing.Size(212, 17);
             this.checkBox_DisplayRatioCorrection.TabIndex = 6;
@@ -361,11 +370,55 @@
             this.checkBox_DisplayRatioCorrection.UseVisualStyleBackColor = true;
             this.checkBox_DisplayRatioCorrection.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
+            // button_Palette_generatefromImage
+            // 
+            this.button_Palette_generatefromImage.Location = new System.Drawing.Point(6, 66);
+            this.button_Palette_generatefromImage.Name = "button_Palette_generatefromImage";
+            this.button_Palette_generatefromImage.Size = new System.Drawing.Size(185, 32);
+            this.button_Palette_generatefromImage.TabIndex = 7;
+            this.button_Palette_generatefromImage.Text = "Palette aus Bild generieren";
+            this.button_Palette_generatefromImage.UseVisualStyleBackColor = true;
+            // 
+            // label_Palette_colorCount
+            // 
+            this.label_Palette_colorCount.AutoSize = true;
+            this.label_Palette_colorCount.Location = new System.Drawing.Point(6, 138);
+            this.label_Palette_colorCount.Name = "label_Palette_colorCount";
+            this.label_Palette_colorCount.Size = new System.Drawing.Size(52, 13);
+            this.label_Palette_colorCount.TabIndex = 7;
+            this.label_Palette_colorCount.Text = "Farben: 1";
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(101, 102);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(49, 20);
+            this.numericUpDown1.TabIndex = 7;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+            // 
+            // label_Palette_desiredCount
+            // 
+            this.label_Palette_desiredCount.AutoSize = true;
+            this.label_Palette_desiredCount.Location = new System.Drawing.Point(33, 104);
+            this.label_Palette_desiredCount.Name = "label_Palette_desiredCount";
+            this.label_Palette_desiredCount.Size = new System.Drawing.Size(62, 13);
+            this.label_Palette_desiredCount.TabIndex = 7;
+            this.label_Palette_desiredCount.Text = "Farbanzahl:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1441, 762);
+            this.ClientSize = new System.Drawing.Size(1584, 882);
             this.Controls.Add(this.checkBoxColors);
             this.Controls.Add(this.checkBoxSize);
             this.Controls.Add(this.groupBox_Color);
@@ -384,7 +437,9 @@
             this.groupBox_Size.ResumeLayout(false);
             this.groupBox_Size.PerformLayout();
             this.groupBox_Color.ResumeLayout(false);
+            this.groupBox_Color.PerformLayout();
             this.contextMenu_Palette.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -426,6 +481,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem neueFarbeHinzufügenToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox_DisplayRatioCorrection;
+        private System.Windows.Forms.Button button_Palette_generatefromImage;
+        private System.Windows.Forms.Label label_Palette_colorCount;
+        private System.Windows.Forms.Label label_Palette_desiredCount;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
     }
 }
 
