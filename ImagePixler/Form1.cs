@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +19,9 @@ namespace ImagePixler
         private Bitmap Vorschaubild;
         private Bitmap Displaybild;
         private double RatioCorrFactor = 1;
+        private bool DisplayRatioCorrection = false;
+        private bool automode_on = false;
+        private BackgroundWorker _worker = null;
 
         public Form1()
         {
@@ -122,6 +127,11 @@ namespace ImagePixler
         public static Color HextoColor(String colorCode)
         {
             return System.Drawing.ColorTranslator.FromHtml(colorCode);
+        }
+
+        public static String ColortoHex(Color Col)
+        {
+            return ColorTranslator.ToHtml(Col);
         }
 
         /// Converts RGB to Color
@@ -536,31 +546,36 @@ namespace ImagePixler
                 Dateiname = openFileDialog_Picture.FileName;
                 Originalbild = new Bitmap(Dateiname);
                 Vorschaubild = Originalbild;
-                refreshDisplay();
-                checkBox_DisplayRatioCorrection.Enabled = true;
+                DisplayRatioCorrection = checkBox_DisplayRatioCorrection.Checked;
+                displayImage(Vorschaubild);
             }
         }
 
-        private void refreshDisplay()
+        private void displayImage(Image Bild)
         {
-            //TODO skalierung implementieren
+            if (DisplayRatioCorrection)
+            {
+                RatioCorrFactor = Double.Parse(textBox_Ratio.Text);
+            }
+            else
+            {
+                RatioCorrFactor = 1;
+            }
             int newWidth, newHeight;
 
             if (((double)Vorschaubild.Width * RatioCorrFactor) / ((double)Vorschaubild.Height) > (double)pictureBox_Display.Width / (double)pictureBox_Display.Height)
-            {//Bild ist breiter als hoch... breite auf breite der Picturebox setzen, höhe im gleichen verhältnis
+            {//Bild ist (mit korrekturfaktor) breiter als hoch... breite auf breite der Picturebox setzen, höhe verhältnis
                 newWidth = pictureBox_Display.Width;
                 newHeight = (int)((((double)pictureBox_Display.Width / (double)Vorschaubild.Width) * (double)Vorschaubild.Height) / RatioCorrFactor) ;
             }
             else
-            {
+            {//Bild ist (mit korrekturfaktor) hoeher als breit... hoehe auf hoehe der Picturebox setzen, breite im verhältnis
                 newHeight = (int)((double)pictureBox_Display.Height);
                 newWidth = (int)((((double)pictureBox_Display.Height / (double)Vorschaubild.Height) * (double)Vorschaubild.Width)*RatioCorrFactor);
             }
 
-            //newHeight =(int)((double)newHeight / RatioCorrFactor);
-
-            Bitmap Zoombild = new Bitmap(newWidth, newHeight);
-            using (Graphics gr = Graphics.FromImage(Zoombild))
+            Displaybild = new Bitmap(newWidth, newHeight);
+            using (Graphics gr = Graphics.FromImage(Displaybild))
             {
                 gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
                 gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
@@ -568,7 +583,8 @@ namespace ImagePixler
                 gr.DrawImage(Vorschaubild, new Rectangle(0, 0, newWidth, newHeight));
             }
 
-            pictureBox_Display.Image = Zoombild;
+            pictureBox_Display.Image = Displaybild;
+            button_SaveImage.Enabled = true;
         }
 
         private void button_Color_loadPalette_Click(object sender, EventArgs e)
@@ -611,7 +627,7 @@ namespace ImagePixler
             item.ImageKey = colorCode;  //...und ans item haengen
             listView_Palette.ShowItemToolTips = true;
             item.ToolTipText = colorCode;
-
+            label_Palette_colorCount.Text = "Farben: " + listView_Palette.Items.Count;
         }
 
         private Image generateColorPreviewImage(Color Farbe)
@@ -690,6 +706,7 @@ namespace ImagePixler
         private void dieseFarbeEntfernenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             listView_Palette.FocusedItem.Remove();
+            label_Palette_colorCount.Text = "Farben: " + listView_Palette.Items.Count;
         }
 
         private void neueFarbeHinzufügenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -705,26 +722,319 @@ namespace ImagePixler
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void button_Palette_generatefromImage_Click(object sender, EventArgs e)
         {
-            if (checkBox_DisplayRatioCorrection.Checked)
+            generatePalettefromImage((int)numericUpDown1.Value);
+        }
+
+        private void generatePalettefromImage(int maxColors)
+        {
+            int Toleranz = 5;
+            
+            List<Color> Farbliste;
+            Farbliste = scanImageforColors(Vorschaubild, Toleranz);
+
+
+            do //Liste mit immer höherer Toleranz generieren, bis die Farbanzahl gering genug ist.
             {
-                double parseresult;
-                if(Double.TryParse(textBox_Ratio.Text, out parseresult))
+                int i = 0;
+                while (i < Farbliste.Count - 1)
                 {
-                    RatioCorrFactor = parseresult;
+                    if (colorsSimilar(Farbliste[i], Farbliste[i + 1], Toleranz))
+                    {
+                        Farbliste.RemoveAt(i + 1);
+                    }
+                    i++;
+                }
+
+                Toleranz++;
+
+
+
+            } while (Farbliste.Count > maxColors);
+
+
+
+            String colorCode = "";
+            listView_Palette.Items.Clear(); //Palette leeren...
+            foreach (Color Col in Farbliste)  //...und neu befuellen
+            {
+                colorCode = ColortoHex(Col);
+                addNewColor(colorCode, colorCode);
+            }
+        }
+
+        private List<Color> scanImageforColors(Bitmap Bild,int FarbToleranz)
+        {
+            List<Color> genPalette = new List<Color>();
+
+            bool farbebereitsvorhanden = false;
+            Color pixelfarbe;
+
+            progressBar1.Maximum = Bild.Width;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+
+            try
+            {
+                for (int x = 0; x < Bild.Size.Width; x++)
+                {
+                    progressBar1.Value = x;
+                    for (int y = 0; y < Bild.Size.Height; y++)
+                    {
+                        pixelfarbe = Bild.GetPixel(x, y);
+                        farbebereitsvorhanden = false;
+                        foreach (Color listfarbe in genPalette)
+                        {
+                            if (colorsSimilar(listfarbe, pixelfarbe, FarbToleranz))
+                            {
+                                farbebereitsvorhanden = true;
+                            }
+                        }
+                        if (!farbebereitsvorhanden)
+                        {
+                            genPalette.Add(pixelfarbe);
+                        }
+                    }
+                }
+
+                //Parallel.For(0, Bild.Size.Width, x =>
+                //{
+                //    progressBar1.Value = x;
+                //    for (int y = 0; y < Bild.Size.Height; y++)
+                //    {
+                //        pixelfarbe = Bild.GetPixel(x, y);
+                //        farbebereitsvorhanden = false;
+                //        foreach (Color listfarbe in genPalette)
+                //        {
+                //            if (colorsSimilar(listfarbe, pixelfarbe, FarbToleranz))
+                //            {
+                //                farbebereitsvorhanden = true;
+                //            }
+                //        }
+                //        if (!farbebereitsvorhanden)
+                //        {
+                //            genPalette.Add(pixelfarbe);
+                //        }
+                //    }
+                //} );
+
+                
+
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("Exception: " + e);
+            }
+            progressBar1.Visible = false;
+            return genPalette;
+            
+        }
+
+        private bool colorsSimilar(Color Color1, Color Color2, int farbToleranz)
+        {
+            return (ColorDifference(Color1, Color2) < farbToleranz);
+        }
+
+        public static Bitmap ResizeImage(Image image, String side, int pixelAmount, double RatioCorrFactor)
+        {
+            int newWidth = 0;
+            int newHeight= 0;
+
+            if(side.Equals("kürzere Seite"))
+            {
+                if (image.Width < image.Height)
+                {
+                    side = "Breite";
                 }
                 else
                 {
-                    RatioCorrFactor = 1;
+                    side = "Höhe";
                 }
+            }
 
+            if (side.Equals("Breite"))
+            {
+                newWidth = pixelAmount;
+                newHeight = (int)((((double)newWidth / (double)image.Width) * (double)image.Height) * RatioCorrFactor);
             }
             else
             {
-                RatioCorrFactor = 1;
+                newHeight = pixelAmount;
+                newWidth = (int)((((double)newHeight / (double)image.Height) * (double)image.Width) / RatioCorrFactor);
+
             }
-            refreshDisplay();
+            var destRect = new Rectangle(0, 0, newWidth, newHeight);
+            var destImage = new Bitmap(newWidth, newHeight);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
+
+        private void button_Preview_Click(object sender, EventArgs e)
+        {
+            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), double.Parse(textBox_Ratio.Text));
+            DisplayRatioCorrection = true;
+            displayImage(Vorschaubild);
+        }
+
+        private void button_Palette_Apply_Click(object sender, EventArgs e)
+        {
+            ImageColorstoPaletteColors(Vorschaubild);
+        }
+
+        private void ImageColorstoPaletteColors(Bitmap Bild)
+        {
+            progressBar1.Maximum = Bild.Width;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+
+            List<Color> Palette = new List<Color>();
+            foreach (ListViewItem item in listView_Palette.Items)
+            {
+                Palette.Add(HextoColor(item.SubItems[1].Text));
+            }
+
+
+            for (int x = 0; x < Bild.Width; x++)
+            {
+                progressBar1.Value = x;
+
+                for (int y = 0; y < Bild.Height; y++)
+                {
+                    //für jedes Pixel schauen welcher Palettenfarbe es am nächsten kommt
+                    double minFarbabstand = double.MaxValue;
+                    Color Minabstandsfarbe = Color.White;
+
+                    Color Pixelfarbe = Bild.GetPixel(x, y);
+                    //TODO: an dieser Stelle den/die Fehler der Fehlermatrix aufrechnen
+
+                    foreach (Color Palettenfarbe in Palette)
+                    {
+                        
+                        double Farbabstand = ColorDifference(Palettenfarbe,Pixelfarbe);
+
+                        if (Farbabstand < minFarbabstand)
+                        {
+                            minFarbabstand = Farbabstand;
+                            Minabstandsfarbe = Palettenfarbe;
+                        }
+                    }
+                    Bild.SetPixel(x, y, Minabstandsfarbe);
+
+                    //TODO: an dieser Stelle den/die Fehler berechnen fürs Dithering
+
+
+
+
+
+                }
+            }
+            progressBar1.Visible = false;
+            displayImage(Bild);
+        }
+
+        private void button_ResetImage_Click(object sender, EventArgs e)
+        {
+            DisplayRatioCorrection = checkBox_DisplayRatioCorrection.Checked;
+            Vorschaubild = Originalbild;
+            displayImage(Vorschaubild);
+        }
+
+        private void button_loadRandomImage_Click(object sender, EventArgs e)
+        {
+            loadRandomImage();
+        }
+
+        private void loadRandomImage()
+        {
+            var request = System.Net.WebRequest.Create("https://source.unsplash.com/random");
+
+            using (var response = request.GetResponse())
+            using (var stream = response.GetResponseStream())
+            {
+                Image myImage = Bitmap.FromStream(stream);
+                Originalbild = new Bitmap(myImage);
+            }
+
+            DisplayRatioCorrection = checkBox_DisplayRatioCorrection.Checked;
+            Vorschaubild = Originalbild;
+            displayImage(Vorschaubild);
+        }
+
+        private void button_resizeAndreduce_Click(object sender, EventArgs e)
+        {
+            resizeAndreduce();
+        }
+
+        private void resizeAndreduce()
+        {
+            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), double.Parse(textBox_Ratio.Text));
+            DisplayRatioCorrection = true;
+            displayImage(Vorschaubild);
+            ImageColorstoPaletteColors(Vorschaubild);
+        }
+
+        private void button_SaveImage_Click(object sender, EventArgs e)
+        {
+            saveImagewithDialog();
+        }
+
+        private void saveImagewithDialog()
+        {
+            saveFileDialog_Picture.RestoreDirectory = true;
+            saveFileDialog_Picture.Filter = "Bitmap (*.bmp)|*.bmp";
+            saveFileDialog_Picture.FileName = "MeinPixelbild_ " + DateTime.Now.ToString("yyyyMMddHHmmssfff") +  ".bmp";
+            DialogResult Result = saveFileDialog_Picture.ShowDialog();
+            if (Result == DialogResult.OK)
+            {
+                String filePath = saveFileDialog_Picture.FileName;
+                Vorschaubild.Save(saveFileDialog_Picture.FileName, ImageFormat.Bmp);
+            }
+        }
+
+        private void button_automode_Click(object sender, EventArgs e)
+        {
+            if (!automode_on)
+            {
+                automode_on = true;
+                timer_continueAutomode.Enabled = true;
+            }
+            else
+            {
+                automode_on = false;
+            }
+        }
+
+        private void timer_continueAutomode_Tick(object sender, EventArgs e)
+        {
+            timer_continueAutomode.Enabled = false;
+            if(automode_on)
+            {
+                loadRandomImage();
+                resizeAndreduce();
+                String Filename_Originalbild = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/AutoPixelbild_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "_original.png";
+                String Filename_Pixelbild = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/AutoPixelbild_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".bmp";
+                Originalbild.Save(Filename_Originalbild, ImageFormat.Png);
+                Vorschaubild.Save(Filename_Pixelbild, ImageFormat.Bmp);
+                timer_continueAutomode.Enabled = true;
+            }
         }
     }
 }
