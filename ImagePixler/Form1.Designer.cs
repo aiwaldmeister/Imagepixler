@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
+            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
             "Weiss",
             "#FFFFFF"}, -1);
             this.button_LoadImage = new System.Windows.Forms.Button();
@@ -44,6 +44,7 @@
             this.textBox_Wunschbreite = new System.Windows.Forms.TextBox();
             this.button_Size_Apply = new System.Windows.Forms.Button();
             this.groupBox_Color = new System.Windows.Forms.GroupBox();
+            this.label_Dithering = new System.Windows.Forms.Label();
             this.label_Palette_Tolerance = new System.Windows.Forms.Label();
             this.label_Palette_colorCount = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -55,8 +56,7 @@
             this.button_Color_savePalette = new System.Windows.Forms.Button();
             this.button_Color_loadPalette = new System.Windows.Forms.Button();
             this.button_Palette_Apply = new System.Windows.Forms.Button();
-            this.checkBoxSize = new System.Windows.Forms.CheckBox();
-            this.checkBoxColors = new System.Windows.Forms.CheckBox();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.openFileDialog_Picture = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog_Picture = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog_Palette = new System.Windows.Forms.OpenFileDialog();
@@ -73,12 +73,12 @@
             this.button_loadRandomImage = new System.Windows.Forms.Button();
             this.button_resizeAndreduce = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.button_automode = new System.Windows.Forms.Button();
             this.timer_continueAutomode = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Display)).BeginInit();
             this.groupBox_Size.SuspendLayout();
             this.groupBox_Color.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.contextMenu_Palette.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -97,7 +97,7 @@
             this.pictureBox_Display.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox_Display.Location = new System.Drawing.Point(223, 8);
             this.pictureBox_Display.Name = "pictureBox_Display";
-            this.pictureBox_Display.Size = new System.Drawing.Size(1349, 867);
+            this.pictureBox_Display.Size = new System.Drawing.Size(1441, 909);
             this.pictureBox_Display.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox_Display.TabIndex = 1;
             this.pictureBox_Display.TabStop = false;
@@ -122,12 +122,12 @@
             this.groupBox_Size.Controls.Add(this.comboBoxWunschseite);
             this.groupBox_Size.Controls.Add(this.textBox_Wunschbreite);
             this.groupBox_Size.Controls.Add(this.button_Size_Apply);
-            this.groupBox_Size.Location = new System.Drawing.Point(12, 204);
+            this.groupBox_Size.Location = new System.Drawing.Point(12, 180);
             this.groupBox_Size.Name = "groupBox_Size";
             this.groupBox_Size.Size = new System.Drawing.Size(203, 172);
             this.groupBox_Size.TabIndex = 3;
             this.groupBox_Size.TabStop = false;
-            this.groupBox_Size.Text = "Größe ändern";
+            this.groupBox_Size.Text = "Größe";
             // 
             // textBox_Ratio
             // 
@@ -199,10 +199,11 @@
             this.button_Size_Apply.TabIndex = 0;
             this.button_Size_Apply.Text = "Bildgröße ändern";
             this.button_Size_Apply.UseVisualStyleBackColor = false;
-            this.button_Size_Apply.Click += new System.EventHandler(this.button_Preview_Click);
+            this.button_Size_Apply.Click += new System.EventHandler(this.button_Size_Apply_Click);
             // 
             // groupBox_Color
             // 
+            this.groupBox_Color.Controls.Add(this.label_Dithering);
             this.groupBox_Color.Controls.Add(this.label_Palette_Tolerance);
             this.groupBox_Color.Controls.Add(this.label_Palette_colorCount);
             this.groupBox_Color.Controls.Add(this.numericUpDown1);
@@ -211,12 +212,22 @@
             this.groupBox_Color.Controls.Add(this.button_Color_savePalette);
             this.groupBox_Color.Controls.Add(this.button_Color_loadPalette);
             this.groupBox_Color.Controls.Add(this.button_Palette_Apply);
-            this.groupBox_Color.Location = new System.Drawing.Point(12, 382);
+            this.groupBox_Color.Controls.Add(this.trackBar1);
+            this.groupBox_Color.Location = new System.Drawing.Point(12, 380);
             this.groupBox_Color.Name = "groupBox_Color";
-            this.groupBox_Color.Size = new System.Drawing.Size(203, 493);
+            this.groupBox_Color.Size = new System.Drawing.Size(203, 537);
             this.groupBox_Color.TabIndex = 4;
             this.groupBox_Color.TabStop = false;
-            this.groupBox_Color.Text = "Farben auf Palette reduzieren";
+            this.groupBox_Color.Text = "Farbpalette";
+            // 
+            // label_Dithering
+            // 
+            this.label_Dithering.AutoSize = true;
+            this.label_Dithering.Location = new System.Drawing.Point(6, 507);
+            this.label_Dithering.Name = "label_Dithering";
+            this.label_Dithering.Size = new System.Drawing.Size(52, 13);
+            this.label_Dithering.TabIndex = 12;
+            this.label_Dithering.Text = "Dithering:";
             // 
             // label_Palette_Tolerance
             // 
@@ -258,9 +269,9 @@
             this.listView_Palette.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
-            listViewItem1.StateImageIndex = 0;
+            listViewItem2.StateImageIndex = 0;
             this.listView_Palette.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1});
+            listViewItem2});
             this.listView_Palette.LabelEdit = true;
             this.listView_Palette.LargeImageList = this.imageList_Palette;
             this.listView_Palette.Location = new System.Drawing.Point(6, 195);
@@ -325,29 +336,18 @@
             this.button_Palette_Apply.UseVisualStyleBackColor = false;
             this.button_Palette_Apply.Click += new System.EventHandler(this.button_Palette_Apply_Click);
             // 
-            // checkBoxSize
+            // trackBar1
             // 
-            this.checkBoxSize.AutoSize = true;
-            this.checkBoxSize.Checked = true;
-            this.checkBoxSize.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxSize.Location = new System.Drawing.Point(201, 208);
-            this.checkBoxSize.Name = "checkBoxSize";
-            this.checkBoxSize.Size = new System.Drawing.Size(15, 14);
-            this.checkBoxSize.TabIndex = 5;
-            this.checkBoxSize.UseVisualStyleBackColor = true;
-            this.checkBoxSize.CheckedChanged += new System.EventHandler(this.checkBoxSize_CheckedChanged);
-            // 
-            // checkBoxColors
-            // 
-            this.checkBoxColors.AutoSize = true;
-            this.checkBoxColors.Checked = true;
-            this.checkBoxColors.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxColors.Location = new System.Drawing.Point(201, 387);
-            this.checkBoxColors.Name = "checkBoxColors";
-            this.checkBoxColors.Size = new System.Drawing.Size(15, 14);
-            this.checkBoxColors.TabIndex = 5;
-            this.checkBoxColors.UseVisualStyleBackColor = true;
-            this.checkBoxColors.CheckedChanged += new System.EventHandler(this.checkBoxColors_CheckedChanged);
+            this.trackBar1.AutoSize = false;
+            this.trackBar1.LargeChange = 10;
+            this.trackBar1.Location = new System.Drawing.Point(59, 500);
+            this.trackBar1.Maximum = 100;
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(132, 24);
+            this.trackBar1.SmallChange = 5;
+            this.trackBar1.TabIndex = 12;
+            this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBar1.Value = 100;
             // 
             // openFileDialog_Picture
             // 
@@ -449,23 +449,13 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(223, 852);
+            this.progressBar1.Location = new System.Drawing.Point(223, 900);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(1349, 23);
+            this.progressBar1.Size = new System.Drawing.Size(1441, 17);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 10;
             this.progressBar1.UseWaitCursor = true;
             this.progressBar1.Visible = false;
-            // 
-            // button_automode
-            // 
-            this.button_automode.Location = new System.Drawing.Point(140, 163);
-            this.button_automode.Name = "button_automode";
-            this.button_automode.Size = new System.Drawing.Size(75, 23);
-            this.button_automode.TabIndex = 11;
-            this.button_automode.Text = "Automode";
-            this.button_automode.UseVisualStyleBackColor = true;
-            this.button_automode.Click += new System.EventHandler(this.button_automode_Click);
             // 
             // timer_continueAutomode
             // 
@@ -475,22 +465,23 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1584, 882);
-            this.Controls.Add(this.button_automode);
+            this.ClientSize = new System.Drawing.Size(1676, 927);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button_resizeAndreduce);
             this.Controls.Add(this.button_loadRandomImage);
             this.Controls.Add(this.button_ResetImage);
-            this.Controls.Add(this.checkBoxColors);
-            this.Controls.Add(this.checkBoxSize);
             this.Controls.Add(this.groupBox_Color);
             this.Controls.Add(this.groupBox_Size);
             this.Controls.Add(this.button_SaveImage);
             this.Controls.Add(this.button_LoadImage);
             this.Controls.Add(this.pictureBox_Display);
             this.Controls.Add(this.checkBox_DisplayRatioCorrection);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "ImagePixler";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Display)).EndInit();
             this.groupBox_Size.ResumeLayout(false);
@@ -498,6 +489,7 @@
             this.groupBox_Color.ResumeLayout(false);
             this.groupBox_Color.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.contextMenu_Palette.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -519,9 +511,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ComboBox comboBoxWunschseite;
-        private System.Windows.Forms.CheckBox checkBoxSize;
         private System.Windows.Forms.CheckBox checkBoxRatio;
-        private System.Windows.Forms.CheckBox checkBoxColors;
         private System.Windows.Forms.Label label_Ratio;
         private System.Windows.Forms.Button button_Palette_Apply;
         private System.Windows.Forms.OpenFileDialog openFileDialog_Picture;
@@ -547,8 +537,9 @@
         private System.Windows.Forms.Button button_loadRandomImage;
         private System.Windows.Forms.Button button_resizeAndreduce;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Button button_automode;
         private System.Windows.Forms.Timer timer_continueAutomode;
+        private System.Windows.Forms.Label label_Dithering;
+        private System.Windows.Forms.TrackBar trackBar1;
     }
 }
 

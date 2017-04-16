@@ -501,30 +501,6 @@ namespace ImagePixler
             return Math.Sin(d * Math.PI / 180);
         }
         
-        private void checkBoxSize_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBoxSize.Checked)
-            {
-                groupBox_Size.Enabled = true;
-            }
-            else
-            {
-                groupBox_Size.Enabled = false;
-            }
-        }
-
-        private void checkBoxColors_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBoxColors.Checked)
-            {
-                groupBox_Color.Enabled = true;
-            }
-            else
-            {
-                groupBox_Color.Enabled = false;
-            }
-        }
-
         private void checkBoxRatio_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxRatio.Checked)
@@ -836,7 +812,7 @@ namespace ImagePixler
             return (ColorDifference(Color1, Color2) < farbToleranz);
         }
 
-        public static Bitmap ResizeImage(Image image, String side, int pixelAmount, double RatioCorrFactor)
+        public static Bitmap ResizeImage(Image image, String side, int pixelAmount, double Ratio)
         {
             int newWidth = 0;
             int newHeight= 0;
@@ -856,12 +832,12 @@ namespace ImagePixler
             if (side.Equals("Breite"))
             {
                 newWidth = pixelAmount;
-                newHeight = (int)((((double)newWidth / (double)image.Width) * (double)image.Height) * RatioCorrFactor);
+                newHeight = (int)((((double)newWidth / (double)image.Width) * (double)image.Height) * Ratio);
             }
             else
             {
                 newHeight = pixelAmount;
-                newWidth = (int)((((double)newHeight / (double)image.Height) * (double)image.Width) / RatioCorrFactor);
+                newWidth = (int)((((double)newHeight / (double)image.Height) * (double)image.Width) / Ratio);
 
             }
             var destRect = new Rectangle(0, 0, newWidth, newHeight);
@@ -887,63 +863,128 @@ namespace ImagePixler
             return destImage;
         }
 
-        private void button_Preview_Click(object sender, EventArgs e)
+        private void button_Size_Apply_Click(object sender, EventArgs e)
         {
-            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), double.Parse(textBox_Ratio.Text));
-            DisplayRatioCorrection = true;
+            DisplayRatioCorrection = false;
+            double Ratio = 1;
+            if (checkBoxRatio.Checked)
+            {
+                Ratio = double.Parse(textBox_Ratio.Text);
+                DisplayRatioCorrection = true;
+            }
+            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), Ratio);
+            
             displayImage(Vorschaubild);
         }
 
         private void button_Palette_Apply_Click(object sender, EventArgs e)
         {
-            ImageColorstoPaletteColors(Vorschaubild);
+            ImageColorstoPaletteColors(Vorschaubild, trackBar1.Value);
         }
 
-        private void ImageColorstoPaletteColors(Bitmap Bild)
+        private void ImageColorstoPaletteColors(Bitmap Bild, int dithering_amount)
         {
-            progressBar1.Maximum = Bild.Width;
+            bool dithering = true;
+
+            if(dithering_amount == 0)
+            {
+                dithering = false;
+            }
+            if(dithering_amount > 10)
+            {
+                dithering_amount = 10;
+            }
+            
+            progressBar1.Maximum = Bild.Height;
             progressBar1.Value = 0;
             progressBar1.Visible = true;
 
-            List<Color> Palette = new List<Color>();
+            double minFarbabstand;
+            double Farbabstand;
+            Color Color_Zielfarbe = Color.White;
+            CIELab LAB_Zielfarbe = new CIELab();
+            Color Pixelfarbe;
+
+            Double[,] Corr_L = new Double[Bild.Width+1, Bild.Height+1];
+            Corr_L[0, 0] = 0;
+            Double[,] Corr_A = new Double[Bild.Width+1, Bild.Height+1];
+            Corr_A[0, 0] = 0;
+            Double[,] Corr_B = new Double[Bild.Width+1, Bild.Height+1];
+            Corr_B[0, 0] = 0;
+            Double Error_L, Error_A, Error_B;
+            
+            List<CIELab> LAB_Palette = new List<CIELab>();
+            List<Color> Color_Palette = new List<Color>();
+           
+            //Palette aus Listview als LAB und Color in Listen abbilden
             foreach (ListViewItem item in listView_Palette.Items)
             {
-                Palette.Add(HextoColor(item.SubItems[1].Text));
+                Color_Palette.Add(HextoColor(item.SubItems[1].Text));
+                LAB_Palette.Add(ColortoCIELAB(HextoColor(item.SubItems[1].Text)));
             }
 
-
-            for (int x = 0; x < Bild.Width; x++)
+            //Schleife durch alle Pixel
+            for (int y = 0; y < Bild.Height; y++)
             {
-                progressBar1.Value = x;
+                progressBar1.Value = y;
 
-                for (int y = 0; y < Bild.Height; y++)
+                for (int x = 0; x < Bild.Width; x++)
                 {
+                    minFarbabstand = double.MaxValue;
                     //für jedes Pixel schauen welcher Palettenfarbe es am nächsten kommt
-                    double minFarbabstand = double.MaxValue;
-                    Color Minabstandsfarbe = Color.White;
+                    Pixelfarbe = Bild.GetPixel(x, y);
+                    CIELab LAB_Pixelfarbe = ColortoCIELAB(Pixelfarbe);
 
-                    Color Pixelfarbe = Bild.GetPixel(x, y);
-                    //TODO: an dieser Stelle den/die Fehler der Fehlermatrix aufrechnen
-
-                    foreach (Color Palettenfarbe in Palette)
+                    // vor dem Vergleich die Fehler der Fehlermatrix aufrechnen
+                    if (dithering)
                     {
-                        
-                        double Farbabstand = ColorDifference(Palettenfarbe,Pixelfarbe);
-
+                        LAB_Pixelfarbe.L = LAB_Pixelfarbe.L + Corr_L[x, y];
+                        LAB_Pixelfarbe.A = LAB_Pixelfarbe.A + Corr_A[x, y];
+                        LAB_Pixelfarbe.B = LAB_Pixelfarbe.B + Corr_B[x, y];
+                    }
+                    
+                    for(int i = 0; i < LAB_Palette.Count; i++)
+                    {
+                        CIELab LAB_Palettenfarbe = LAB_Palette[i];
+                        Farbabstand = ColorDifferenceLAB(LAB_Pixelfarbe, LAB_Palettenfarbe);
                         if (Farbabstand < minFarbabstand)
                         {
                             minFarbabstand = Farbabstand;
-                            Minabstandsfarbe = Palettenfarbe;
+                            Color_Zielfarbe = Color_Palette[i];
+                            LAB_Zielfarbe = LAB_Palette[i];
                         }
                     }
-                    Bild.SetPixel(x, y, Minabstandsfarbe);
+                    
+                    Bild.SetPixel(x, y, Color_Zielfarbe);
 
-                    //TODO: an dieser Stelle den/die Fehler berechnen fürs Dithering
+                    //Fehler berechnen fürs Dithering
+                    if (dithering)
+                    {
+                        Error_L = LAB_Pixelfarbe.L - LAB_Zielfarbe.L;
+                        Error_A = LAB_Pixelfarbe.A - LAB_Zielfarbe.A;
+                        Error_B = LAB_Pixelfarbe.B - LAB_Zielfarbe.B;
 
+                        Error_L = Error_L * ((double)dithering_amount / 10);
+                        Error_A = Error_A * ((double)dithering_amount / 10);
+                        Error_B = Error_B * ((double)dithering_amount / 10);
 
-
-
-
+                        Corr_L[x + 1, y] = Error_L * 7 / 16;
+                        Corr_A[x + 1, y] = Error_A * 7 / 16;
+                        Corr_B[x + 1, y] = Error_B * 7 / 16;
+                        if(x != 0)
+                        {
+                            Corr_L[x - 1, y + 1] = Error_L * 3 / 16;
+                            Corr_A[x - 1, y + 1] = Error_A * 3 / 16;
+                            Corr_B[x - 1, y + 1] = Error_B * 3 / 16;
+                        }
+                        Corr_L[x, y + 1] = Error_L * 5 / 16;
+                        Corr_A[x, y + 1] = Error_A * 5 / 16;
+                        Corr_B[x, y + 1] = Error_B * 5 / 16;
+                        Corr_L[x + 1, y + 1] = Error_L * 1 / 16;
+                        Corr_A[x + 1, y + 1] = Error_A * 1 / 16;
+                        Corr_B[x + 1, y + 1] = Error_B * 1 / 16;
+                    }
+              
                 }
             }
             progressBar1.Visible = false;
@@ -985,10 +1026,17 @@ namespace ImagePixler
 
         private void resizeAndreduce()
         {
-            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), double.Parse(textBox_Ratio.Text));
-            DisplayRatioCorrection = true;
+            DisplayRatioCorrection = false;
+            double Ratio = 1;
+            if (checkBoxRatio.Checked)
+            {
+                Ratio = double.Parse(textBox_Ratio.Text);
+                DisplayRatioCorrection = true;
+            }
+            Vorschaubild = ResizeImage(Originalbild, comboBoxWunschseite.Text, int.Parse(textBox_Wunschbreite.Text), Ratio);
+            
             displayImage(Vorschaubild);
-            ImageColorstoPaletteColors(Vorschaubild);
+            ImageColorstoPaletteColors(Vorschaubild, trackBar1.Value);
         }
 
         private void button_SaveImage_Click(object sender, EventArgs e)
@@ -1035,6 +1083,11 @@ namespace ImagePixler
                 Vorschaubild.Save(Filename_Pixelbild, ImageFormat.Bmp);
                 timer_continueAutomode.Enabled = true;
             }
+        }
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            MessageBox.Show("Test");
         }
     }
 }
