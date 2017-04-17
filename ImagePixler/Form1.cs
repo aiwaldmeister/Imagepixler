@@ -21,7 +21,10 @@ namespace ImagePixler
         private double RatioCorrFactor = 1;
         private bool DisplayRatioCorrection = false;
         private bool automode_on = false;
+        private bool cropmode_on = false;
         private BackgroundWorker _worker = null;
+        private int crop_display_x1, crop_display_x2, crop_display_y1, crop_display_y2 = 0;
+        private int crop_image_x1, crop_image_x2, crop_image_y1, crop_image_y2 = 0;
 
         public Form1()
         {
@@ -1088,6 +1091,49 @@ namespace ImagePixler
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             MessageBox.Show("Test");
+        }
+
+        private void button_crop_Click(object sender, EventArgs e)
+        {
+            activate_cropmode();
+            
+        }
+
+        private void activate_cropmode()
+        {
+            cropmode_on = true;
+            groupBox_Color.Enabled = false;
+            groupBox_File.Enabled = false;
+            groupBox_Size.Enabled = false;
+        }
+
+        private void deactivate_cropmode()
+        {
+            groupBox_Color.Enabled = true;
+            groupBox_File.Enabled = true;
+            groupBox_Size.Enabled = true;
+        }
+
+        private void pictureBox_Display_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (cropmode_on)
+            {
+                cropmode_on = false;
+                crop_display_x2 = e.X;
+                crop_display_y2 = e.Y;
+                deactivate_cropmode();
+                //MessageBox.Show(crop_display_x1 + "," + crop_display_y1 + "-" + crop_display_x2 + "," + crop_display_y2);
+            }
+            
+        }
+
+        private void pictureBox_Display_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (cropmode_on)
+            {
+                crop_display_x1 = e.X;
+                crop_display_y1 = e.Y;
+            }
         }
     }
 }

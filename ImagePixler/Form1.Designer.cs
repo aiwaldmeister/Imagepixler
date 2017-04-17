@@ -36,6 +36,7 @@
             this.pictureBox_Display = new System.Windows.Forms.PictureBox();
             this.button_SaveImage = new System.Windows.Forms.Button();
             this.groupBox_Size = new System.Windows.Forms.GroupBox();
+            this.button_crop = new System.Windows.Forms.Button();
             this.textBox_Ratio = new System.Windows.Forms.TextBox();
             this.label_Ratio = new System.Windows.Forms.Label();
             this.label_Px = new System.Windows.Forms.Label();
@@ -74,19 +75,22 @@
             this.button_resizeAndreduce = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.timer_continueAutomode = new System.Windows.Forms.Timer(this.components);
+            this.groupBox_File = new System.Windows.Forms.GroupBox();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Display)).BeginInit();
             this.groupBox_Size.SuspendLayout();
             this.groupBox_Color.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.contextMenu_Palette.SuspendLayout();
+            this.groupBox_File.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_LoadImage
             // 
-            this.button_LoadImage.Location = new System.Drawing.Point(12, 12);
+            this.button_LoadImage.Location = new System.Drawing.Point(6, 15);
             this.button_LoadImage.Name = "button_LoadImage";
-            this.button_LoadImage.Size = new System.Drawing.Size(143, 24);
+            this.button_LoadImage.Size = new System.Drawing.Size(117, 24);
             this.button_LoadImage.TabIndex = 0;
             this.button_LoadImage.Text = "Bild laden";
             this.button_LoadImage.UseVisualStyleBackColor = true;
@@ -95,19 +99,21 @@
             // pictureBox_Display
             // 
             this.pictureBox_Display.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox_Display.Location = new System.Drawing.Point(223, 8);
+            this.pictureBox_Display.Location = new System.Drawing.Point(223, 12);
             this.pictureBox_Display.Name = "pictureBox_Display";
-            this.pictureBox_Display.Size = new System.Drawing.Size(1441, 909);
+            this.pictureBox_Display.Size = new System.Drawing.Size(1441, 935);
             this.pictureBox_Display.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox_Display.TabIndex = 1;
             this.pictureBox_Display.TabStop = false;
+            this.pictureBox_Display.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_Display_MouseDown);
+            this.pictureBox_Display.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox_Display_MouseUp);
             // 
             // button_SaveImage
             // 
             this.button_SaveImage.Enabled = false;
-            this.button_SaveImage.Location = new System.Drawing.Point(12, 132);
+            this.button_SaveImage.Location = new System.Drawing.Point(6, 135);
             this.button_SaveImage.Name = "button_SaveImage";
-            this.button_SaveImage.Size = new System.Drawing.Size(203, 25);
+            this.button_SaveImage.Size = new System.Drawing.Size(185, 25);
             this.button_SaveImage.TabIndex = 2;
             this.button_SaveImage.Text = "Bild speichern als...";
             this.button_SaveImage.UseVisualStyleBackColor = true;
@@ -115,6 +121,7 @@
             // 
             // groupBox_Size
             // 
+            this.groupBox_Size.Controls.Add(this.button_crop);
             this.groupBox_Size.Controls.Add(this.textBox_Ratio);
             this.groupBox_Size.Controls.Add(this.label_Ratio);
             this.groupBox_Size.Controls.Add(this.label_Px);
@@ -122,12 +129,22 @@
             this.groupBox_Size.Controls.Add(this.comboBoxWunschseite);
             this.groupBox_Size.Controls.Add(this.textBox_Wunschbreite);
             this.groupBox_Size.Controls.Add(this.button_Size_Apply);
-            this.groupBox_Size.Location = new System.Drawing.Point(12, 180);
+            this.groupBox_Size.Location = new System.Drawing.Point(12, 193);
             this.groupBox_Size.Name = "groupBox_Size";
-            this.groupBox_Size.Size = new System.Drawing.Size(203, 172);
+            this.groupBox_Size.Size = new System.Drawing.Size(203, 211);
             this.groupBox_Size.TabIndex = 3;
             this.groupBox_Size.TabStop = false;
             this.groupBox_Size.Text = "Größe";
+            // 
+            // button_crop
+            // 
+            this.button_crop.Location = new System.Drawing.Point(6, 172);
+            this.button_crop.Name = "button_crop";
+            this.button_crop.Size = new System.Drawing.Size(185, 33);
+            this.button_crop.TabIndex = 11;
+            this.button_crop.Text = "Zuschneiden";
+            this.button_crop.UseVisualStyleBackColor = true;
+            this.button_crop.Click += new System.EventHandler(this.button_crop_Click);
             // 
             // textBox_Ratio
             // 
@@ -213,7 +230,7 @@
             this.groupBox_Color.Controls.Add(this.button_Color_loadPalette);
             this.groupBox_Color.Controls.Add(this.button_Palette_Apply);
             this.groupBox_Color.Controls.Add(this.trackBar1);
-            this.groupBox_Color.Location = new System.Drawing.Point(12, 380);
+            this.groupBox_Color.Location = new System.Drawing.Point(12, 410);
             this.groupBox_Color.Name = "groupBox_Color";
             this.groupBox_Color.Size = new System.Drawing.Size(203, 537);
             this.groupBox_Color.TabIndex = 4;
@@ -409,7 +426,7 @@
             // checkBox_DisplayRatioCorrection
             // 
             this.checkBox_DisplayRatioCorrection.AutoSize = true;
-            this.checkBox_DisplayRatioCorrection.Location = new System.Drawing.Point(48, 71);
+            this.checkBox_DisplayRatioCorrection.Location = new System.Drawing.Point(38, 74);
             this.checkBox_DisplayRatioCorrection.Name = "checkBox_DisplayRatioCorrection";
             this.checkBox_DisplayRatioCorrection.Size = new System.Drawing.Size(112, 17);
             this.checkBox_DisplayRatioCorrection.TabIndex = 6;
@@ -418,9 +435,9 @@
             // 
             // button_ResetImage
             // 
-            this.button_ResetImage.Location = new System.Drawing.Point(161, 12);
+            this.button_ResetImage.Location = new System.Drawing.Point(129, 15);
             this.button_ResetImage.Name = "button_ResetImage";
-            this.button_ResetImage.Size = new System.Drawing.Size(54, 53);
+            this.button_ResetImage.Size = new System.Drawing.Size(62, 53);
             this.button_ResetImage.TabIndex = 7;
             this.button_ResetImage.Text = "Bild neu laden";
             this.button_ResetImage.UseVisualStyleBackColor = true;
@@ -428,9 +445,9 @@
             // 
             // button_loadRandomImage
             // 
-            this.button_loadRandomImage.Location = new System.Drawing.Point(12, 42);
+            this.button_loadRandomImage.Location = new System.Drawing.Point(6, 45);
             this.button_loadRandomImage.Name = "button_loadRandomImage";
-            this.button_loadRandomImage.Size = new System.Drawing.Size(143, 23);
+            this.button_loadRandomImage.Size = new System.Drawing.Size(117, 23);
             this.button_loadRandomImage.TabIndex = 8;
             this.button_loadRandomImage.Text = "zufälliges Bild";
             this.button_loadRandomImage.UseVisualStyleBackColor = true;
@@ -439,9 +456,9 @@
             // button_resizeAndreduce
             // 
             this.button_resizeAndreduce.BackColor = System.Drawing.Color.SkyBlue;
-            this.button_resizeAndreduce.Location = new System.Drawing.Point(12, 94);
+            this.button_resizeAndreduce.Location = new System.Drawing.Point(6, 97);
             this.button_resizeAndreduce.Name = "button_resizeAndreduce";
-            this.button_resizeAndreduce.Size = new System.Drawing.Size(203, 32);
+            this.button_resizeAndreduce.Size = new System.Drawing.Size(185, 32);
             this.button_resizeAndreduce.TabIndex = 9;
             this.button_resizeAndreduce.Text = "Pixelbild Erzeugen";
             this.button_resizeAndreduce.UseVisualStyleBackColor = false;
@@ -449,9 +466,9 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(223, 900);
+            this.progressBar1.Location = new System.Drawing.Point(221, 933);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(1441, 17);
+            this.progressBar1.Size = new System.Drawing.Size(1441, 14);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 10;
             this.progressBar1.UseWaitCursor = true;
@@ -461,21 +478,38 @@
             // 
             this.timer_continueAutomode.Tick += new System.EventHandler(this.timer_continueAutomode_Tick);
             // 
+            // groupBox_File
+            // 
+            this.groupBox_File.Controls.Add(this.button_resizeAndreduce);
+            this.groupBox_File.Controls.Add(this.checkBox_DisplayRatioCorrection);
+            this.groupBox_File.Controls.Add(this.button_LoadImage);
+            this.groupBox_File.Controls.Add(this.button_SaveImage);
+            this.groupBox_File.Controls.Add(this.button_loadRandomImage);
+            this.groupBox_File.Controls.Add(this.button_ResetImage);
+            this.groupBox_File.Location = new System.Drawing.Point(12, 8);
+            this.groupBox_File.Name = "groupBox_File";
+            this.groupBox_File.Size = new System.Drawing.Size(203, 179);
+            this.groupBox_File.TabIndex = 11;
+            this.groupBox_File.TabStop = false;
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Location = new System.Drawing.Point(0, 954);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1676, 22);
+            this.statusStrip1.TabIndex = 12;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1676, 927);
+            this.ClientSize = new System.Drawing.Size(1676, 976);
+            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.groupBox_File);
             this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.button_resizeAndreduce);
-            this.Controls.Add(this.button_loadRandomImage);
-            this.Controls.Add(this.button_ResetImage);
             this.Controls.Add(this.groupBox_Color);
             this.Controls.Add(this.groupBox_Size);
-            this.Controls.Add(this.button_SaveImage);
-            this.Controls.Add(this.button_LoadImage);
             this.Controls.Add(this.pictureBox_Display);
-            this.Controls.Add(this.checkBox_DisplayRatioCorrection);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Form1";
@@ -491,6 +525,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.contextMenu_Palette.ResumeLayout(false);
+            this.groupBox_File.ResumeLayout(false);
+            this.groupBox_File.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -540,6 +576,9 @@
         private System.Windows.Forms.Timer timer_continueAutomode;
         private System.Windows.Forms.Label label_Dithering;
         private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.Button button_crop;
+        private System.Windows.Forms.GroupBox groupBox_File;
+        private System.Windows.Forms.StatusStrip statusStrip1;
     }
 }
 
