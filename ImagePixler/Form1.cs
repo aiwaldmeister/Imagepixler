@@ -137,6 +137,24 @@ namespace ImagePixler
             return ColorTranslator.ToHtml(Col);
         }
 
+        public struct coordinate
+        {
+            private int x;
+            private int y;
+            
+            public int X
+            {
+                get
+                {
+                    return this.x;
+                }
+                set
+                {
+                    this.y = value;
+                }
+            }
+        }
+
         /// Converts RGB to Color
         public static Color RGBtoColor(RGB RGBColor)
         {
@@ -1135,5 +1153,8 @@ namespace ImagePixler
                 crop_display_y1 = e.Y;
             }
         }
+
+        //private void ()
+
     }
 }

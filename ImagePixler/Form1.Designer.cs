@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
+            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
             "Weiss",
             "#FFFFFF"}, -1);
             this.button_LoadImage = new System.Windows.Forms.Button();
@@ -286,9 +286,9 @@
             this.listView_Palette.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
-            listViewItem2.StateImageIndex = 0;
+            listViewItem1.StateImageIndex = 0;
             this.listView_Palette.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem2});
+            listViewItem1});
             this.listView_Palette.LabelEdit = true;
             this.listView_Palette.LargeImageList = this.imageList_Palette;
             this.listView_Palette.Location = new System.Drawing.Point(6, 195);
@@ -466,7 +466,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(221, 933);
+            this.progressBar1.Location = new System.Drawing.Point(223, 933);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(1441, 14);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
